@@ -48,4 +48,20 @@ public class Publisher {
     public void setBooks(Set<Book> books) {
         this.books = books;
     }
+    
+    @Override
+    public String toString() {
+    	 String result = String.format(
+                 "Publisher [id=%d, name='%s']%n",
+                 id, name);
+         if (books != null) {
+             for(Book book : books) {
+                 result += String.format(
+                         "Book[id=%d, name='%s']%n",
+                         book.getId(), book.getName());
+             }
+         }
+
+         return result;
+    }
 }

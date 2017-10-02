@@ -1,9 +1,9 @@
 package com.hellokoding.jpa;
 
-import com.hellokoding.jpa.model.Book;
-import com.hellokoding.jpa.model.Publisher;
-import com.hellokoding.jpa.repository.BookRepository;
-import com.hellokoding.jpa.repository.PublisherRepository;
+import java.util.HashSet;
+
+import javax.transaction.Transactional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,67 +11,87 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import javax.transaction.Transactional;
-import java.util.HashSet;
+import com.hellokoding.jpa.model.Book;
+import com.hellokoding.jpa.model.Publisher;
+import com.hellokoding.jpa.repository.BookRepository;
+import com.hellokoding.jpa.repository.PublisherRepository;
 
 @SpringBootApplication
 public class HelloJpaApplication implements CommandLineRunner {
-    private static final Logger logger = LoggerFactory.getLogger(HelloJpaApplication.class);
+	private static final Logger logger = LoggerFactory.getLogger(HelloJpaApplication.class);
 
-    @Autowired
-    private BookRepository bookRepository;
+	@Autowired
+	private BookRepository bookRepository;
 
-    @Autowired
-    private PublisherRepository publisherRepository;
+	@Autowired
+	private PublisherRepository publisherRepository;
 
-    public static void main(String[] args) {
-        SpringApplication.run(HelloJpaApplication.class, args);
-    }
+	public static void main(String[] args) {
+		SpringApplication.run(HelloJpaApplication.class, args);
+	}
 
-    @Override
-    @Transactional
-    public void run(String... strings) throws Exception {
-        // save a couple of books
-        final Publisher publisherA = new Publisher("Publisher A");
-        final Publisher publisherB = new Publisher("Publisher B");
-        final Publisher publisherC = new Publisher("Publisher C");
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.springframework.boot.CommandLineRunner#run(java.lang.String[])
+	 */
 
-        bookRepository.save(new HashSet<Book>(){{
-            add(new Book("Book A", new HashSet<Publisher>(){{
-                add(publisherA);
-                add(publisherB);
-            }}));
+	@Override
+	@Transactional
+	public void run(String... strings) throws Exception {
 
-            add(new Book("Book B", new HashSet<Publisher>(){{
-                add(publisherA);
-                add(publisherC);
-            }}));
-        }});
+		final Publisher publisherA = publisherRepository.save(new Publisher("Publisher A"));
+		final Publisher publisherB = publisherRepository.save(new Publisher("Publisher B"));
 
-        // fetch all books
-        for(Book book : bookRepository.findAll()) {
-            logger.info(book.toString());
-        }
+		final Book bookA = new Book("Book A", new HashSet<Publisher>() {
+			{
+				add(publisherA);
+				add(publisherB);
+			}
+		});
 
-        // save a couple of publishers
-        final Book bookA = new Book("Book A");
-        final Book bookB = new Book("Book B");
+		final Book bookB = new Book("Book B", new HashSet<Publisher>() {
+			{
+				add(publisherB);
+			}
+		});
 
-        publisherRepository.save(new HashSet<Publisher>() {{
-            add(new Publisher("Publisher A", new HashSet<Book>() {{
-                add(bookA);
-                add(bookB);
-            }}));
+		final Book bookC = new Book("Book C", new HashSet<Publisher>() {
+			{
+				add(publisherA);
+			}
+		});
 
-            add(new Publisher("Publisher B", new HashSet<Book>() {{
-                add(bookA);
-                add(bookB);
-            }}));
-        }});
+		bookRepository.save(bookA);
+		bookRepository.save(bookB);
+		bookRepository.save(bookC);
 
-        // fetch all publishers
-        for(Publisher publisher : publisherRepository.findAll()) {
-            logger.info(publisher.toString());
-        }
-    }
+		publisherA.setBooks(new HashSet<Book>() {
+			{
+				add(bookA);
+				add(bookC);
+			}
+		});
+
+		publisherB.setBooks(new HashSet<Book>() {
+			{
+				add(bookA);
+				add(bookB);
+			}
+		});
+
+		// publisherRepository.save(publisherA);
+		// publisherRepository.save(publisherB);
+
+		// fetch all books
+		for (Book book : bookRepository.findAll()) {
+			logger.info(book.toString());
+		}
+
+		// fetch all publishers
+		for (Publisher publisher : publisherRepository.findAll()) {
+			logger.info(publisher.toString());
+		}
+
+	}
 }
