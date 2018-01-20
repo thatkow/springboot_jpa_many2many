@@ -66,6 +66,10 @@ public class HelloJpaApplication implements CommandLineRunner {
 		bookRepository.save(bookB);
 		bookRepository.save(bookC);
 
+		/*
+		 * TODO: Why does this operation link books to publisherA in the repository?
+		 * Isn't this just a local variable?
+		 */
 		publisherA.setBooks(new HashSet<Book>() {
 			{
 				add(bookA);
@@ -73,12 +77,12 @@ public class HelloJpaApplication implements CommandLineRunner {
 			}
 		});
 
-		publisherB.setBooks(new HashSet<Book>() {
-			{
-				add(bookA);
-				add(bookB);
-			}
-		});
+		// publisherB.setBooks(new HashSet<Book>() {
+		// {
+		// add(bookA);
+		// add(bookB);
+		// }
+		// });
 
 		// publisherRepository.save(publisherA);
 		// publisherRepository.save(publisherB);
